@@ -5,9 +5,13 @@ interface ICodifaiEngine {
     
     event CodifaiPoolCreated(address indexed CodifaiPool);
     
-    function createCodifaiPool(address token, uint256 amount) external;
+    function createCodifaiPool(address[] calldata tokens, uint256[] calldata amounts) external;
+
+    function removeCodifaiPool(address pool) external;
 
     function getCodifaiPool() external view returns (address);
 
-    function getCodifaiPoolInfo(address pool) external view returns (address, uint256);
+    function getCodifaiPoolTokens(address pool) external view returns (address[] memory);
+
+    function getCodifaiPoolBalance(address pool, address token) external view returns (uint256);
 }

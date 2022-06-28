@@ -13,6 +13,11 @@ describe("CodifaiEngine", function () {
     const codifaiEngine = await CodifaiEngine.deploy(signers[0].address);    
     await codifaiEngine.deployed();
 
+    const TestToken = await ethers.getContractFactory("TestToken");
+    const testToken = await TestToken.deploy("Codifai Test Token", "CTT", ethers.utils.parseEther("10000"));
+    await testToken.deployed();
+
     console.log(codifaiEngine.address);
+    console.log(testToken.address);
   });
 });

@@ -9,23 +9,30 @@ contract CodifaiPool is ICodifaiPool {
 
     address private _creator;
 
-    address private _token;
+    address[] private _tokens;
 
-    uint256 _amount;
+    mapping(address => uint256) private _amounts;
 
     modifier onlyEngine() {
         require(msg.sender == _engine, "Only allowed from engine");
         _;
     }
 
-    constructor(address engine, address creator, address token, uint256 amount) {
+    constructor(address engine, address creator, address[] memory tokens, uint256[] memory amounts) {
         _engine = engine;
         _creator = creator;
-        _token = token;
-        _amount = amount;
+        for (uint256 i = 0; i < tokens.length; i++) {
+            _tokens.push(tokens[i]);
+            _amounts[tokens[i]] = amounts[i];
+        }
     }
 
-    function getPoolInformation() external override onlyEngine view returns (address, uint256) {
-        return (_token, _amount);
+    function getPoolTokens() external override onlyEngine view returns (address[] memory) {
+        return _tokens;
+    }
+
+    function getPoolTokenBalance(address token) external override onlyEngine view returns (uint256)
+    {
+        return _amounts[token];
     }
 }
