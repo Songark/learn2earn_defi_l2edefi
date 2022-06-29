@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "../interface/ICodifaiPool.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract CodifaiPool is ICodifaiPool {
 
@@ -34,5 +35,12 @@ contract CodifaiPool is ICodifaiPool {
     function getPoolTokenBalance(address token) external override onlyEngine view returns (uint256)
     {
         return _amounts[token];
+    }
+
+    function withdraw() external override onlyEngine {
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            IERC20(_tokens[i]).transfer(_creator, _amounts[_tokens[i]]);
+            _amounts[_tokens[i]] = 0;
+        }
     }
 }

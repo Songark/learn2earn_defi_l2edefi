@@ -3,11 +3,17 @@ pragma solidity ^0.8.4;
 
 interface ICodifaiEngine {
     
-    event CodifaiPoolCreated(address indexed CodifaiPool);
+    event CodifaiPoolCreated(address indexed codifaiPool);
+
+    event CodifaiPoolRemoveSubmitted(address indexed codifaiPool);
+
+    event CodifaiPoolWithdrawed(address indexed codifaiPool, address indexed orgCustomer);
     
     function createCodifaiPool(address[] calldata tokens, uint256[] calldata amounts) external;
 
-    function removeCodifaiPool(address pool) external;
+    function requestRemoveCodifaiPool(address pool) external;
+
+    function confirmRemoveCodifaiPool(address pool) external;
 
     function getCodifaiPool() external view returns (address);
 

@@ -5,7 +5,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "CodifaiPool",
+        "name": "codifaiPool",
         "type": "address"
       }
     ],
@@ -13,16 +13,61 @@
     "type": "event"
   },
   {
+    "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
         "internalType": "address",
-        "name": "token",
+        "name": "codifaiPool",
+        "type": "address"
+      }
+    ],
+    "name": "CodifaiPoolRemoveSubmitted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "codifaiPool",
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
+        "indexed": true,
+        "internalType": "address",
+        "name": "orgCustomer",
+        "type": "address"
+      }
+    ],
+    "name": "CodifaiPoolWithdrawed",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "pool",
+        "type": "address"
+      }
+    ],
+    "name": "confirmRemoveCodifaiPool",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "tokens",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
       }
     ],
     "name": "createCodifaiPool",
@@ -49,15 +94,15 @@
         "internalType": "address",
         "name": "pool",
         "type": "address"
-      }
-    ],
-    "name": "getCodifaiPoolInfo",
-    "outputs": [
+      },
       {
         "internalType": "address",
-        "name": "",
+        "name": "token",
         "type": "address"
-      },
+      }
+    ],
+    "name": "getCodifaiPoolBalance",
+    "outputs": [
       {
         "internalType": "uint256",
         "name": "",
@@ -65,6 +110,38 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "pool",
+        "type": "address"
+      }
+    ],
+    "name": "getCodifaiPoolTokens",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "pool",
+        "type": "address"
+      }
+    ],
+    "name": "requestRemoveCodifaiPool",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]

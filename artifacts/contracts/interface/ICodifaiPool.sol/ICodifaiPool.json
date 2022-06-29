@@ -4,14 +4,15 @@
   "sourceName": "contracts/interface/ICodifaiPool.sol",
   "abi": [
     {
-      "inputs": [],
-      "name": "getPoolInformation",
-      "outputs": [
+      "inputs": [
         {
           "internalType": "address",
-          "name": "",
+          "name": "token",
           "type": "address"
-        },
+        }
+      ],
+      "name": "getPoolTokenBalance",
+      "outputs": [
         {
           "internalType": "uint256",
           "name": "",
@@ -19,6 +20,26 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getPoolTokens",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     }
   ],

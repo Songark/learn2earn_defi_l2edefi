@@ -6,4 +6,7 @@ interface ICodifaiPool {
     function getPoolTokens() external view returns (address[] memory);
 
     function getPoolTokenBalance(address token) external view returns (uint256);
+
+    function withdraw() external;
+    
 }
