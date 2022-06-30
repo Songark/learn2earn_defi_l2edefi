@@ -3,10 +3,23 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "codifaiPool",
-        "type": "address"
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "poolIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "CodifaiCompletedCourse",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "poolIndex",
+        "type": "uint256"
       }
     ],
     "name": "CodifaiPoolCreated",
@@ -16,10 +29,10 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "codifaiPool",
-        "type": "address"
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "poolIndex",
+        "type": "uint256"
       }
     ],
     "name": "CodifaiPoolRemoveSubmitted",
@@ -29,16 +42,10 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "codifaiPool",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "orgCustomer",
-        "type": "address"
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "poolIndex",
+        "type": "uint256"
       }
     ],
     "name": "CodifaiPoolWithdrawed",
@@ -47,9 +54,40 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "poolIndex",
+        "type": "uint256"
+      },
+      {
         "internalType": "address",
-        "name": "pool",
+        "name": "to",
         "type": "address"
+      }
+    ],
+    "name": "claimRewards",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "poolIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "completeLearning",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "poolIndex",
+        "type": "uint256"
       }
     ],
     "name": "confirmRemoveCodifaiPool",
@@ -91,9 +129,9 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "pool",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "poolIndex",
+        "type": "uint256"
       },
       {
         "internalType": "address",
@@ -115,9 +153,9 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "pool",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "poolIndex",
+        "type": "uint256"
       }
     ],
     "name": "getCodifaiPoolTokens",
@@ -134,12 +172,30 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "pool",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "poolIndex",
+        "type": "uint256"
       }
     ],
     "name": "requestRemoveCodifaiPool",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "poolIndex",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "rewards",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "setCodifaiPoolRewards",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

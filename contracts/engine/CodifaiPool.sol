@@ -14,6 +14,12 @@ contract CodifaiPool is ICodifaiPool {
 
     mapping(address => uint256) private _amounts;
 
+    mapping(address => uint256) private _rewards;
+
+    mapping(address => mapping(address => uint256)) private _balances;
+
+    mapping(address => bool) private _completed;
+
     modifier onlyEngine() {
         require(msg.sender == _engine, "Only allowed from engine");
         _;
@@ -25,6 +31,13 @@ contract CodifaiPool is ICodifaiPool {
         for (uint256 i = 0; i < tokens.length; i++) {
             _tokens.push(tokens[i]);
             _amounts[tokens[i]] = amounts[i];
+        }
+    }
+
+    function setPoolRewards(uint256[] calldata rewards) external override {
+        require(rewards.length == _tokens.length, "Invalid array length for rewards");
+        for (uint256 i = 0; i < rewards.length; i++) {
+            _rewards[_tokens[i]] = rewards[i];
         }
     }
 
@@ -41,6 +54,30 @@ contract CodifaiPool is ICodifaiPool {
         for (uint256 i = 0; i < _tokens.length; i++) {
             IERC20(_tokens[i]).transfer(_creator, _amounts[_tokens[i]]);
             _amounts[_tokens[i]] = 0;
+        }
+    }
+
+    function completeLearning(address user) external override onlyEngine {
+        require(!_completed[user], "Already completed this course");
+        
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            if (_balances[user][_tokens[i]] == 0) {
+                require(_amounts[_tokens[i]] >= _rewards[_tokens[i]], "Insufficient balance for rewards");
+
+                _balances[user][_tokens[i]] = _rewards[_tokens[i]];
+                _amounts[_tokens[i]] -= _rewards[_tokens[i]];
+            }            
+        }        
+    }
+
+    function claimRewards(address user, address to) external override onlyEngine {
+        require(to!= address(0), "Invalid address to for rewards");
+
+        _completed[user] = true;
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            if (_balances[user][_tokens[i]] > 0) {
+                IERC20(_tokens[i]).transfer(to, _balances[user][_tokens[i]]);
+            }            
         }
     }
 }

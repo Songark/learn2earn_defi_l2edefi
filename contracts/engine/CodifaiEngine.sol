@@ -14,8 +14,11 @@ error CodifaiEngine__InvalidTokensAndAmounts(uint256 tokenLen, uint256 amountLen
 /// @notice Emitted when invalid msg.sender will try to remove pool
 error CodifaiEngine__NotPermissionForRemove(address ownerAddress);
 
-/// @notice Emitted when invalid msg.sender will try to remove pool
-error CodifaiEngine__NotRequestedToRemove(address poolAddress);
+/// @notice Emitted when remove pool's request is invalid
+error CodifaiEngine__NotRequestedToRemove(uint256 index);
+
+/// @notice Emitted when invalid poolIndex entered
+error CodifaiEngine__InvalidPoolIndex(uint256 index);
 
 contract CodifaiEngine is ICodifaiEngine, Ownable {
     using SafeMath for uint256 ;
@@ -24,13 +27,26 @@ contract CodifaiEngine is ICodifaiEngine, Ownable {
 
     address private _treasury;
 
-    mapping(address => address) private _pools;
+    /// @dev array of all pools
+    address[] private _allPools;
 
-    mapping(address => address) private _requests;
+    /// @dev mapping of pools for each creator, key is creator address, value is pool address
+    mapping(address => address) private _creatorPool;
 
-    modifier onlyPoolOwner(address pool) {
-        if (_pools[msg.sender] != pool)
+    /// @dev mapping of pool withdrawl requester, key is pool address, value is requester address
+    mapping(address => address) private _poolRequester;
+
+    modifier onlyPoolOwner(uint256 poolIndex) {
+        if (_allPools.length <= poolIndex)
+            revert CodifaiEngine__InvalidPoolIndex({index: poolIndex});
+        if (_creatorPool[msg.sender] != _allPools[poolIndex])
             revert CodifaiEngine__NotPermissionForRemove({ownerAddress: msg.sender});
+        _;
+    }
+
+    modifier onlyValidIndex(uint256 poolIndex) {
+        if (_allPools.length <= poolIndex)
+            revert CodifaiEngine__InvalidPoolIndex({index: poolIndex});
         _;
     }
 
@@ -45,38 +61,64 @@ contract CodifaiEngine is ICodifaiEngine, Ownable {
                 tokenLen: tokens.length, amountLen: amounts.length});
 
         address newPool = __factory.createCodifaiPool(msg.sender, tokens, amounts);
-        _pools[msg.sender] = newPool;
+        _allPools.push(newPool);
+        _creatorPool[msg.sender] = newPool;
 
         for (uint256 i = 0; i < tokens.length; i++) {
             IERC20(tokens[i]).transferFrom(msg.sender, _treasury, amounts[i].mul(20).div(100));
             IERC20(tokens[i]).transferFrom(msg.sender, newPool, amounts[i].mul(80).div(100));
         }
 
-        emit CodifaiPoolCreated(newPool);
+        emit CodifaiPoolCreated(_allPools.length.sub(1));
     }
 
-    function requestRemoveCodifaiPool(address pool) external override onlyPoolOwner(pool) {
-        _requests[pool] = msg.sender;
-        emit CodifaiPoolRemoveSubmitted(pool);
+    function setCodifaiPoolRewards(uint256 poolIndex, uint256[] calldata rewards) external override
+    onlyValidIndex(poolIndex) {
+        ICodifaiPool(_allPools[poolIndex]).setPoolRewards(rewards);
     }
 
-    function confirmRemoveCodifaiPool(address pool) external override onlyOwner {
-        if (_requests[pool] == address(0))
-            revert CodifaiEngine__NotRequestedToRemove({poolAddress: pool});
 
-        ICodifaiPool(pool).withdraw();
-        emit CodifaiPoolWithdrawed(pool, _requests[pool]);
+    function requestRemoveCodifaiPool(uint256 poolIndex) external override 
+    onlyValidIndex(poolIndex) 
+    onlyPoolOwner(poolIndex) {
+        _poolRequester[_allPools[poolIndex]] = msg.sender;
+        emit CodifaiPoolRemoveSubmitted(poolIndex);
+    }
+
+    function confirmRemoveCodifaiPool(uint256 poolIndex) external override 
+    onlyValidIndex(poolIndex) 
+    onlyOwner {
+        if (_poolRequester[_allPools[poolIndex]] == address(0))
+            revert CodifaiEngine__NotRequestedToRemove({index: poolIndex});
+
+        ICodifaiPool(_allPools[poolIndex]).withdraw();
+        emit CodifaiPoolWithdrawed(poolIndex);
     }
 
     function getCodifaiPool() external override view returns (address) {
-        return _pools[msg.sender];
+        return _creatorPool[msg.sender];
     }
 
-    function getCodifaiPoolTokens(address pool) external override view returns (address[] memory) {
-        return ICodifaiPool(pool).getPoolTokens();
+    function getCodifaiPoolTokens(uint256 poolIndex) external override 
+    onlyValidIndex(poolIndex) 
+    view returns (address[] memory) {
+        return ICodifaiPool(_allPools[poolIndex]).getPoolTokens();
     }
 
-    function getCodifaiPoolBalance(address pool, address token) external override view returns (uint256) {
-        return ICodifaiPool(pool).getPoolTokenBalance(token);
+    function getCodifaiPoolBalance(uint256 poolIndex, address token) external override 
+    onlyValidIndex(poolIndex) 
+    view returns (uint256) {
+        return ICodifaiPool(_allPools[poolIndex]).getPoolTokenBalance(token);
+    }
+
+    function completeLearning(uint256 poolIndex) external override 
+    onlyValidIndex(poolIndex) {
+        ICodifaiPool(_allPools[poolIndex]).completeLearning(msg.sender);
+        emit CodifaiCompletedCourse(poolIndex);
+    }
+
+    function claimRewards(uint256 poolIndex, address to) external override 
+    onlyValidIndex(poolIndex) {
+        ICodifaiPool(_allPools[poolIndex]).claimRewards(msg.sender, to);
     }
 }
