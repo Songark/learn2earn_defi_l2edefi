@@ -9,11 +9,11 @@ describe("CodifaiEngine", function () {
   let courseUser2;
   let codifaiEngine;
   let testToken;
-  let poolIndexs;
+  let courseIds;
 
   before('Create fixture loader', async () => {
     signers = await ethers.getSigners();
-    poolIndexs = [];
+    courseIds = [];
 
     /// set different users' wallet address
     engineCreator = signers[0];
@@ -40,11 +40,7 @@ describe("CodifaiEngine", function () {
    * @dev display all users' balance for monitoring changes
    */
   async function showBalances() {
-    console.log("[Token Balances]");    
-    for (let i = 0; i < poolIndexs.length; i++) {
-      const poolBalance = await codifaiEngine.getCodifaiPoolBalance(poolIndexs[i], testToken.address);
-      console.log("\tpool", poolIndexs[i].toString(), ":", parseFloat(ethers.utils.formatEther(poolBalance)).toFixed(1));
-    }
+    console.log("[Token Balances]");        
     let balance = await testToken.balanceOf(engineCreator.address);
     console.log("\tengineCreator:", ethers.utils.formatEther(balance));
     balance = await testToken.balanceOf(courseCreator.address);
@@ -53,6 +49,9 @@ describe("CodifaiEngine", function () {
     console.log("\tcourseUser1:", ethers.utils.formatEther(balance));
     balance = await testToken.balanceOf(courseUser2.address);
     console.log("\tcourseUser2:", ethers.utils.formatEther(balance));    
+    const pool = await codifaiEngine.connect(courseCreator).getPool();
+    balance = await testToken.balanceOf(pool);
+    console.log("\tpool:", ethers.utils.formatEther(balance));    
   }
 
   /**
@@ -73,33 +72,33 @@ describe("CodifaiEngine", function () {
 
     /// create Pool with tokens and amounts array, _ex) one token and all balance
     console.log("[Create Pool for One Course]")
-    let _tx = await codifaiEngine.connect(courseCreator).createCodifaiPool(tokens, amounts);
+    let _tx = await codifaiEngine.connect(courseCreator).createCourse(tokens, amounts);
     let _receipt = await _tx.wait();
-    let _events = _receipt.events.filter((x) => {return x.event == "CodifaiPoolCreated"});
+    let _events = _receipt.events.filter((x) => {return x.event == "CourseCreated"});
     if (_events.length > 0) {
-      /// wait the CodifaiPoolCreated event from smart contract and get pool index
-      const poolIndex = _events[0].args[0];
-      poolIndexs.push(poolIndex);
-      console.log("\tCreated CodifaiPool Successfully, Index:", poolIndex.toString());
+      /// wait the CourseCreated event from smart contract and get pool index
+      const courseId = _events[0].args[0];
+      courseIds.push(courseId);
+      console.log("\tCreated Course Successfully, Index:", courseId.toString());
 
       await showBalances();
 
       /// set rewards for each tokens in created pool, _ex) all balance / 100 => rewards
       amounts[0] = balance.div(100);
-      await codifaiEngine.connect(courseCreator).setCodifaiPoolRewards(poolIndex, amounts);
-      console.log("[Set CodifaiPool Rewards]\n\t", ethers.utils.formatEther(amounts[0]));
+      await codifaiEngine.connect(courseCreator).setRewardsToCourse(courseId, tokens, amounts);
+      console.log("[Set Course Rewards]\n\t", ethers.utils.formatEther(amounts[0]));
 
       /// if user1 will complete the course, he can call completeLearning with index and special code 
       console.log("[Complete Course in the Pool]")
-      _tx = await codifaiEngine.connect(courseUser1).completeLearning(poolIndex);
+      _tx = await codifaiEngine.connect(courseCreator).completeCourse(courseId, courseUser1.address);
       _receipt = await _tx.wait();
-      _events = _receipt.events.filter((x) => {return x.event == "CodifaiCompletedCourse"});
+      _events = _receipt.events.filter((x) => {return x.event == "CompletedCourse"});
       if (_events.length > 0) {
-        console.log("\tComplete course successfully, User:", courseUser1.address, ", Index", poolIndex.toString());
+        console.log("\tComplete course successfully, User:", courseUser1.address, ", Index", courseId.toString());
 
         /// if user1's complete course request is successed, he can claim rewards with token receiver's address
         console.log("[Claim Rewards]");
-        await codifaiEngine.connect(courseUser1).claimRewards(poolIndex, courseUser1.address);
+        await codifaiEngine.connect(courseUser1).claimRewards(courseId, courseUser1.address);
         console.log("\tRewards claimed successfully, To:", courseUser1.address);
 
         await showBalances();
@@ -107,15 +106,15 @@ describe("CodifaiEngine", function () {
 
       /// another completion request from user2
       console.log("[Complete Course in the Pool]")
-      _tx = await codifaiEngine.connect(courseUser2).completeLearning(poolIndex);
+      _tx = await codifaiEngine.connect(courseCreator).completeCourse(courseId, courseUser2.address);
       _receipt = await _tx.wait();
-      _events = _receipt.events.filter((x) => {return x.event == "CodifaiCompletedCourse"});
+      _events = _receipt.events.filter((x) => {return x.event == "CompletedCourse"});
       if (_events.length > 0) {
-        console.log("\tComplete course successfully, User:", courseUser2.address, ", Index", poolIndex.toString());
+        console.log("\tComplete course successfully, User:", courseUser2.address, ", Index", courseId.toString());
 
         /// user2 can claim rewards and send reward tokens to user2's wallet
         console.log("[Claim Rewards]");
-        await codifaiEngine.connect(courseUser2).claimRewards(poolIndex, courseUser1.address);
+        await codifaiEngine.connect(courseUser2).claimRewards(courseId, courseUser1.address);
         console.log("\tRewards claimed successfully, To:", courseUser1.address);
 
         await showBalances();

@@ -3,29 +3,35 @@ pragma solidity ^0.8.4;
 
 interface ICodifaiEngine {
     
-    event CodifaiPoolCreated(uint256 poolIndex);
+    event CourseCreated(uint256 courseId);
 
-    event CodifaiPoolRemoveSubmitted(uint256 poolIndex);
+    event RequestRemoveSubmitted(uint256 courseId);
 
-    event CodifaiPoolWithdrawed(uint256 poolIndex);
+    event CourseWithdrawed(uint256 courseId);
 
-    event CodifaiCompletedCourse(uint256 poolIndex);
+    event CompletedCourse(uint256 courseId, address user);
     
-    function createCodifaiPool(address[] calldata tokens, uint256[] calldata amounts) external;
+    function createCourse(address[] calldata tokens, uint256[] calldata amounts) external;
 
-    function setCodifaiPoolRewards(uint256 poolIndex, uint256[] calldata rewards) external;
+    function setRewardsToCourse(uint256 courseId, address[] calldata tokens, uint256[] calldata rewards) external;
+
+    function setRoaltyToCourse(uint256 courseId, uint256 fee, address[] calldata sponsors) external;
     
-    function requestRemoveCodifaiPool(uint256 poolIndex) external;
+    function requestRemoveCourse(uint256 courseId) external;
 
-    function confirmRemoveCodifaiPool(uint256 poolIndex) external;
+    function confirmRemoveCourse(uint256 courseId) external;
 
-    function getCodifaiPool() external view returns (address);
+    function depositToCourse(address[] calldata tokens, uint256[] calldata amounts) external;
 
-    function getCodifaiPoolTokens(uint256 poolIndex) external view returns (address[] memory);
+    function requestWithdrawCourse() external;
 
-    function getCodifaiPoolBalance(uint256 poolIndex, address token) external view returns (uint256);
+    function confirmWithdrawCourse() external;
 
-    function completeLearning(uint256 poolIndex) external;
+    function completeCourse(uint256 courseId, address user) external;
 
-    function claimRewards(uint256 poolIndex, address to) external;
+    function claimRewards(uint256 courseId, address to) external;
+ 
+    function getPool() external view returns (address);
+
+    function getCourseRewardTokens(uint256 courseId) external view returns (address[] memory);
 }

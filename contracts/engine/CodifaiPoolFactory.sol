@@ -5,8 +5,8 @@ import "./CodifaiPool.sol";
 
 contract CodifaiPoolFactory {
     
-    function createCodifaiPool(address creator, address[] calldata tokens, uint256[] calldata amounts) 
+    function createCodifaiPool(address creator) 
     external returns (address) {
-        return address(new CodifaiPool(msg.sender, creator, tokens, amounts));
+        return address(new CodifaiPool(msg.sender, creator));
     }
 }
