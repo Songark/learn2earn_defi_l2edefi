@@ -59,14 +59,18 @@ contract CodifaiEngine is ICodifaiEngine, Ownable {
         if (tokens.length == 0 || tokens.length != amounts.length)
             revert CodifaiEngine__InvalidTokensAndAmounts({
                 tokenLen: tokens.length, amountLen: amounts.length});
+        uint256[] memory _amounts = amounts;
+        for (uint256 i = 0; i < tokens.length; i++) {
+            IERC20(tokens[i]).transferFrom(msg.sender, _treasury, amounts[i].mul(20).div(100));
+            _amounts[i] = amounts[i].mul(80).div(100);
+        }
 
-        address newPool = __factory.createCodifaiPool(msg.sender, tokens, amounts);
+        address newPool = __factory.createCodifaiPool(msg.sender, tokens, _amounts);
         _allPools.push(newPool);
         _creatorPool[msg.sender] = newPool;
 
         for (uint256 i = 0; i < tokens.length; i++) {
-            IERC20(tokens[i]).transferFrom(msg.sender, _treasury, amounts[i].mul(20).div(100));
-            IERC20(tokens[i]).transferFrom(msg.sender, newPool, amounts[i].mul(80).div(100));
+            IERC20(tokens[i]).transferFrom(msg.sender, newPool, _amounts[i]);
         }
 
         emit CodifaiPoolCreated(_allPools.length.sub(1));
